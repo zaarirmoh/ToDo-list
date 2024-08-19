@@ -2,6 +2,7 @@ package com.example.todolist
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +14,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.todolist.ui.navigation.NavigationSystem
+import com.example.todolist.ui.navigation.OnBoardingScreenN
+import com.example.todolist.ui.screens.onBoardingScreens.OnBoardingScreen
 import com.example.todolist.ui.theme.ToDoListTheme
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -36,7 +39,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDoListTheme {
-                val startDestination = viewModel.getStartingScreen()
+                //val startDestination = viewModel.getStartingScreen()
+                val startDestination = OnBoardingScreenN()
                 NavigationSystem()
                 viewModel.changeStartingScreen()
             }
