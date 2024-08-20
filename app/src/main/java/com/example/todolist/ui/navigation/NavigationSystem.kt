@@ -1,7 +1,10 @@
 package com.example.todolist.ui.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,8 +12,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.todolist.R
 import com.example.todolist.ui.screens.mainScreens.homeScreen.HomeScreen
+import com.example.todolist.ui.screens.mainScreens.listDetailsScreen.TodosScreen
 import com.example.todolist.ui.screens.onBoardingScreens.OnBoardingScreen
-import kotlin.reflect.KClass
 
 @Composable
 fun NavigationSystem(
@@ -49,8 +52,43 @@ fun NavigationSystem(
                 }
             )
         }
-        composable<HomeScreenN> {
-            HomeScreen()
+        composable<HomeScreenN>(
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { -it }) + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
+            }
+        ) {
+            HomeScreen(
+                onCategoryClicked = { category ->
+                    navController.navigate(
+                        TodosScreenN(
+                            categoryId = category.id,
+                            color = category.color,
+                            image = category.photo,
+                            title = category.title
+                        )
+                    )
+                }
+            )
+        }
+        composable<TodosScreenN>(
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { it }) + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+            }
+        ){
+            val args = it.toRoute<TodosScreenN>()
+            TodosScreen(
+                imageRes = args.image,
+                title = args.title,
+                onNavBackClicked = {
+                    navController.navigateUp()
+                }
+            )
         }
     }
 }

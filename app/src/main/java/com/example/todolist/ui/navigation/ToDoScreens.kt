@@ -12,3 +12,11 @@ data class OnBoardingScreenN(
 
 @Serializable
 object HomeScreenN
+
+@Serializable
+data class TodosScreenN(
+    val categoryId: Int,
+    val image: Int,
+    val color: Long,
+    val title: String
+)
