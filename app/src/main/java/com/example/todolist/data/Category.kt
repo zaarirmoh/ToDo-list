@@ -9,6 +9,7 @@ data class Category(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo val title: String,
     @ColumnInfo val icon: Int,
-    @ColumnInfo val color: Int,
-    @ColumnInfo val photo: Int
+    @ColumnInfo val color: Long,
+    @ColumnInfo val photo: Int,
+    @ColumnInfo val todos: Int,
 )

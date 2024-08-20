@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,44 +36,48 @@ fun OnBoardingScreen(
     onSkipClicked: () -> Unit = {},
     onNextClicked: () -> Unit = {}
 ){
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Spacer(modifier = modifier.height(100.dp))
-        Image(
-            painter = painterResource(id = id),
-            contentDescription = null,
-            modifier = modifier.height(300.dp)
-        )
-        Spacer(modifier = modifier.height(90.dp))
-        OnBoardingIndicator(id = id)
-        Spacer(modifier = modifier.height(50.dp))
-        Text(
-            text = title,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.ExtraBold,
-            maxLines = 1
-        )
-        Spacer(modifier = modifier.height(30.dp))
-        Text(
-            text = description,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            modifier = modifier.padding(start = 50.dp, end = 50.dp)
-        )
+    Scaffold {
         Column(
-            modifier = modifier.fillMaxSize().padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.Bottom,
+            modifier = modifier.fillMaxSize().padding(it),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            OnBoardingButtons(
-                buttonText = if(id == R.drawable.onboarding3) "Get started" else "Next",
-                onNextClicked = onNextClicked,
-                onSkipClicked = onSkipClicked
+            Spacer(modifier = modifier.height(100.dp))
+            Image(
+                painter = painterResource(id = id),
+                contentDescription = null,
+                modifier = modifier.height(300.dp)
             )
+            Spacer(modifier = modifier.height(90.dp))
+            OnBoardingIndicator(id = id)
+            Spacer(modifier = modifier.height(50.dp))
+            Text(
+                text = title,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1
+            )
+            Spacer(modifier = modifier.height(30.dp))
+            Text(
+                text = description,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = modifier.padding(start = 50.dp, end = 50.dp)
+            )
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(bottom = 20.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                OnBoardingButtons(
+                    buttonText = if(id == R.drawable.onboarding3) "Get started" else "Next",
+                    onNextClicked = onNextClicked,
+                    onSkipClicked = onSkipClicked
+                )
+            }
         }
     }
 }

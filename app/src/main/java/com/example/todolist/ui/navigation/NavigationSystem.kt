@@ -20,7 +20,7 @@ fun NavigationSystem(
     val startDestination = OnBoardingScreenN()
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = HomeScreenN
     ) {
         composable<OnBoardingScreenN> {
             val args = it.toRoute<OnBoardingScreenN>()

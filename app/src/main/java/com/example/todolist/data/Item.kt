@@ -24,6 +24,5 @@ data class Item(
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "is_completed") val isCompleted: Boolean,
     @ColumnInfo(name = "favorites") val isFavorite: Boolean,
-    @ColumnInfo(name = "date") val date: DateFormat,
-
+    @ColumnInfo(name = "date") val date: String,
 )
