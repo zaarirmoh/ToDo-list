@@ -1,5 +1,7 @@
 package com.example.todolist.ui.screens.mainScreens.homeScreen
 
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -30,6 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,26 +58,25 @@ fun HomeScreen(
     onSearchClicked: () -> Unit = {}
 ){
     val homeUiState by viewModel.homeUiState.collectAsState()
+    val openDialog = remember { mutableStateOf(false) }
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { HomeTopAppBar() },
+        topBar = { HomeTopAppBar(
+            onMenuClicked = onMenuClicked,
+            onSearchClicked = onSearchClicked,
+        ) },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.updateCategory(
-                    Category(
-                        id = 8488,
-                        title = "Scheduled",
-                        icon = R.drawable.scheduled_icon,
-                        color = 0xFF95D5A7,
-                        photo = R.drawable.todoimage2,
-                        todos = 0
-                    )
-                )
-            }) {
+            FloatingActionButton(onClick = {openDialog.value = true}) {
                 Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
             }
         }
     ) {
+        AddCategoryDialog(
+            openDialog = openDialog,
+            viewModel = viewModel,
+            onCancelClicked = {  },
+            onCreateListClicked = {}
+        )
         HomeBody(
             paddingValues = it,
             viewModel = viewModel,
@@ -88,6 +93,7 @@ fun HomeBody(
     categorysList: List<Category>,
     onCategoryClicked: (category: Category) -> Unit
 ){
+    Log.d("recomposition","recomposition")
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -171,10 +177,9 @@ fun StaticListItem(
                 modifier.fillMaxHeight(),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Icon(
+                Image(
                     painter = painterResource(id = category.icon),
                     contentDescription = null,
-                    tint = Color(category.color),
                     modifier = modifier.size(45.dp)
                 )
                 Spacer(modifier = modifier.height(5.dp))
@@ -208,22 +213,33 @@ fun DynamicListItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onCategoryClicked(category) }
-            .padding(8.dp),
+            .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = modifier.width(5.dp))
-        Icon(
-            painter = painterResource(id = category.icon),
-            contentDescription = null,
-            tint = Color.Unspecified
-        )
+        if(category.icon == R.drawable.icon_3d_add){
+            Icon(
+                imageVector = Icons.Rounded.Menu,
+                contentDescription = null,
+                tint = Color(category.color),
+                modifier = modifier.size(30.dp)
+            )
+        }else{
+            Image(
+                painter = painterResource(id = category.icon),
+                contentDescription = null,
+                modifier = modifier.size(30.dp)
+            )
+        }
         Spacer(modifier = modifier.width(15.dp))
         Text(
             text = category.title,
             style = MaterialTheme.typography.titleMedium
         )
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {

@@ -18,5 +18,6 @@ data class TodosScreenN(
     val categoryId: Int,
     val image: Int,
     val color: Long,
-    val title: String
+    val title: String,
+    val icon: Int
 )

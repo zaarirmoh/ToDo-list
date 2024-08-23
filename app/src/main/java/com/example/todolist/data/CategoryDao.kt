@@ -18,7 +18,7 @@ interface CategoryDao {
 
     @Update
     suspend fun updateCategory(category: Category)
-
+    // TODO : add update category using category id when i come back
     @Delete
     suspend fun deleteCategory(category: Category)
 }

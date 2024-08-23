@@ -13,14 +13,17 @@ import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopAppBar(){
+fun HomeTopAppBar(
+    onMenuClicked: () -> Unit,
+    onSearchClicked: () -> Unit
+){
     CenterAlignedTopAppBar(
         title = { Text(
             text = "ToDo",
             fontWeight = FontWeight.Bold
         ) },
         navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onMenuClicked) {
                 Icon(
                     imageVector = Icons.Rounded.Menu,
                     contentDescription = null
@@ -28,7 +31,7 @@ fun HomeTopAppBar(){
             }
         },
         actions = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onSearchClicked) {
                 Icon(
                     imageVector = Icons.Rounded.Search,
                     contentDescription = null
