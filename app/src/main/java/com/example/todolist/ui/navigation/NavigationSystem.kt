@@ -57,7 +57,13 @@ fun NavigationSystem(
                             )
                             else -> HomeScreenN
                         }
-                    navController.navigate(nextDestination)
+                    navController.navigate(nextDestination){
+                        if (nextDestination is HomeScreenN){
+                            popUpTo(OnBoardingScreenN){
+                                inclusive = true
+                            }
+                        }
+                    }
                 }
             )
             val viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)

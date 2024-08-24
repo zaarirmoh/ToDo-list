@@ -108,7 +108,7 @@ fun TodosScreen(
                         color = color,
                         icon = icon,
                         photo = imageRes,
-                        todos = todosUiState.todosList.size
+                        todos = todosUiState.todosList.size+1
                     )
                 )
             }
