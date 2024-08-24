@@ -17,16 +17,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,13 +43,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todolist.R
+import com.example.todolist.data.Category
 import com.example.todolist.data.Item
 import com.example.todolist.ui.AppViewModelProvider
 import com.example.todolist.ui.components.topAppBars.TodosTopAppBar
+import com.example.todolist.ui.screens.mainScreens.homeScreen.HomeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -60,6 +62,7 @@ import java.time.format.DateTimeFormatter
 fun TodosScreen(
     modifier: Modifier = Modifier,
     viewModel: ToDosViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     imageRes: Int,
     color: Long,
     title: String,
@@ -78,7 +81,7 @@ fun TodosScreen(
             FloatingActionButton(
                 onClick = { openDialog.value = true },
                 containerColor = if(imageRes != 0) FloatingActionButtonDefaults.containerColor
-                                 else Color(color),
+                else Color(color),
             ) {
                 Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
             }
@@ -88,7 +91,7 @@ fun TodosScreen(
         AddTodoDialog(
             openDialog = openDialog,
             color = if (imageRes != 0) null else color,
-            onAddItemClicked = { todoName ->  
+            onAddItemClicked = { todoName ->
                 viewModel.addTodo(
                     Item(
                         categoryId = categoryId,
@@ -96,6 +99,16 @@ fun TodosScreen(
                         isCompleted = false,
                         isFavorite = false,
                         date = formattedDate
+                    )
+                )
+                homeViewModel.updateCategory(
+                    Category(
+                        id = categoryId,
+                        title = title,
+                        color = color,
+                        icon = icon,
+                        photo = imageRes,
+                        todos = todosUiState.todosList.size
                     )
                 )
             }
@@ -106,7 +119,32 @@ fun TodosScreen(
             icon = icon,
             title = title,
             todosList = todosUiState.todosList,
-            onNavBackClicked = onNavBackClicked
+            onNavBackClicked = onNavBackClicked,
+            onItemClicked = {},
+            onFavoriteItemClicked = { item ->
+                viewModel.updateTodo(
+                    Item(
+                        id = item.id,
+                        categoryId = item.categoryId,
+                        name = item.name,
+                        isCompleted = item.isCompleted,
+                        isFavorite = !item.isFavorite,
+                        date = item.date
+                    )
+                )
+            },
+            onCheckItemClicked = { item ->
+                viewModel.updateTodo(
+                    Item(
+                        id = item.id,
+                        categoryId = item.categoryId,
+                        name = item.name,
+                        isCompleted = !item.isCompleted,
+                        isFavorite = item.isFavorite,
+                        date = item.date
+                    )
+                )
+            }
         )
     }
 }
@@ -123,6 +161,9 @@ fun TodoBody(
     title: String,
     todosList: List<Item>,
     onNavBackClicked: () -> Unit,
+    onItemClicked: (item: Item) -> Unit,
+    onCheckItemClicked: (item: Item) -> Unit,
+    onFavoriteItemClicked: (item: Item) -> Unit
 ){
     val coroutineScope = rememberCoroutineScope()
     var itemsLoaded by remember {
@@ -183,7 +224,12 @@ fun TodoBody(
                     }
                 }
             }
-            TodoItemList(todosList = todosList)
+            TodoItemList(
+                todosList = todosList,
+                onItemClicked = onItemClicked,
+                onCheckItemClicked = onCheckItemClicked,
+                onFavoriteItemClicked = onFavoriteItemClicked
+            )
         }
     }
 }
@@ -191,14 +237,40 @@ fun TodoBody(
 @Composable
 fun TodoItemList(
     modifier: Modifier = Modifier,
-    todosList: List<Item>
+    todosList: List<Item>,
+    onItemClicked: (item: Item) -> Unit,
+    onCheckItemClicked: (item: Item) -> Unit,
+    onFavoriteItemClicked: (item: Item) -> Unit
 ){
+    val inCompleteTodos = todosList.filter { !it.isCompleted }.sortedBy { !it.isFavorite }
+    val completeTodos = todosList.filter { it.isCompleted }
     LazyColumn(
         contentPadding = PaddingValues(5.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        items(todosList){
-            TodoItem(item = it)
+        items(inCompleteTodos){
+            TodoItem(
+                item = it,
+                onItemClicked = onItemClicked,
+                onCheckItemClicked = onCheckItemClicked,
+                onFavoriteItemClicked = onFavoriteItemClicked
+            )
+        }
+        item {
+            if (completeTodos.isNotEmpty()){
+                HorizontalDivider(
+                    thickness = 3.dp,
+                    modifier = modifier.padding(top = 5.dp, bottom = 5.dp)
+                )
+            }
+        }
+        items(completeTodos){
+            TodoItem(
+                item = it,
+                onItemClicked = onItemClicked,
+                onCheckItemClicked = onCheckItemClicked,
+                onFavoriteItemClicked = onFavoriteItemClicked
+            )
         }
     }
 }
@@ -206,39 +278,45 @@ fun TodoItemList(
 fun TodoItem(
     modifier: Modifier = Modifier,
     item: Item,
+    onItemClicked: (item: Item) -> Unit,
+    onCheckItemClicked: (item: Item) -> Unit,
+    onFavoriteItemClicked: (item: Item) -> Unit,
 ){
     Card(
-        onClick = { /*TODO*/ },
+        onClick = { onItemClicked(item) },
         modifier = modifier.fillMaxWidth(),
         shape = CutCornerShape(0)
     ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(top = 5.dp, bottom = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = false,
-                onClick = {  },
-            )
-            Text(
-                text = item.name,
-                maxLines = 1,
-                fontWeight = FontWeight.Black,
-            )
+        Box {
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(end = 5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
+                    .padding(top = 5.dp, bottom = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = if(item.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = null
-                    )
+                Checkbox(
+                    checked = item.isCompleted,
+                    onCheckedChange = { onCheckItemClicked(item) },
+                )
+                Text(
+                    text = item.name,
+                    maxLines = 1,
+                    fontWeight = FontWeight.Black,
+                    textDecoration = if (item.isCompleted) TextDecoration.LineThrough else null,
+                )
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(end = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = { onFavoriteItemClicked(item) }) {
+                        Icon(
+                            imageVector = if(item.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = null
+                        )
+                    }
                 }
             }
         }
